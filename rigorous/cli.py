@@ -243,6 +243,16 @@ def params(
     print_findings(findings, "Parameter Consistency", console)
 
 
+@app.command()
+def serve() -> None:
+    """Start the MCP server for AI agent integration."""
+    console.print("[bold]Starting Rigorously MCP server...[/bold]")
+    console.print("Waiting for MCP client connection (stdio).\n")
+    import asyncio
+    from .mcp_server import main as mcp_main
+    asyncio.run(mcp_main())
+
+
 def main() -> None:
     """Entry point."""
     app()

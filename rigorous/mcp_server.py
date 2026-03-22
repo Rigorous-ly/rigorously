@@ -245,7 +245,19 @@ async def main():
 
     server = create_server()
     async with stdio_server() as (read_stream, write_stream):
-        await server.run(read_stream, write_stream)
+        from mcp.server import InitializationOptions
+        from mcp.types import ServerCapabilities, ToolsCapability
+        await server.run(
+            read_stream,
+            write_stream,
+            InitializationOptions(
+                server_name="rigorously",
+                server_version="0.1.0",
+                capabilities=ServerCapabilities(
+                    tools=ToolsCapability(),
+                ),
+            ),
+        )
 
 
 if __name__ == "__main__":
