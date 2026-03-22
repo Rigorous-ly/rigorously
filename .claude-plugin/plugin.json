@@ -1,0 +1,12 @@
+{
+  "name": "rigorous",
+  "version": "0.1.0",
+  "description": "Automated research quality assurance",
+  "skills": ["skills/*/SKILL.md"],
+  "mcpServers": {
+    "rigorous": {
+      "command": "python",
+      "args": ["-m", "rigorous.mcp_server"]
+    }
+  }
+}

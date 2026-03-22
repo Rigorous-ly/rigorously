@@ -1,0 +1,46 @@
+{
+  "hooks": [
+    {
+      "name": "rigorous-pre-commit",
+      "event": "pre-commit",
+      "description": "Run rigorous integrity checks on paper files before committing",
+      "command": "rigorous check --quick",
+      "filePatterns": [
+        "*.tex",
+        "*.bib",
+        "*.md",
+        "*.Rmd",
+        "*.qmd"
+      ],
+      "failOnError": true,
+      "enabled": true
+    },
+    {
+      "name": "rigorous-param-check",
+      "event": "pre-commit",
+      "description": "Verify model parameters are consistent when code changes",
+      "command": "rigorous param-audit --changed-only",
+      "filePatterns": [
+        "*.py",
+        "*.r",
+        "*.R",
+        "*.jl",
+        "*.m"
+      ],
+      "failOnError": true,
+      "enabled": true
+    },
+    {
+      "name": "rigorous-cite-check",
+      "event": "pre-commit",
+      "description": "Verify citations when bibliography files change",
+      "command": "rigorous cite-check --changed-only",
+      "filePatterns": [
+        "*.bib",
+        "*.bibtex"
+      ],
+      "failOnError": false,
+      "enabled": true
+    }
+  ]
+}

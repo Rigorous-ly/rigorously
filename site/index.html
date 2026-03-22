@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rigorously — Automated Research Quality Assurance</title>
+    <meta name="description" content="Catch fabricated citations, overclaimed results, and irreproducible numbers before submission. One command. Eight checks.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0b;
+            --surface: #131316;
+            --surface-2: #1a1a1f;
+            --border: #2a2a30;
+            --text: #e4e4e7;
+            --text-muted: #8b8b94;
+            --accent: #22c55e;
+            --accent-dim: #16a34a;
+            --red: #ef4444;
+            --yellow: #eab308;
+            --blue: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Hero */
+        .hero {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            letter-spacing: 0.5px;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 6vw, 64px);
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent), #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 560px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+
+        .install-cmd {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .install-cmd:hover { border-color: var(--accent); }
+
+        .install-cmd .dollar { color: var(--text-muted); }
+        .install-cmd .cmd { color: var(--accent); }
+        .install-cmd .arg { color: var(--text); }
+        .install-cmd .copy {
+            color: var(--text-muted);
+            font-size: 13px;
+            padding-left: 12px;
+            border-left: 1px solid var(--border);
+        }
+
+        /* Stats bar */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .stat { text-align: center; }
+        .stat-num {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Terminal */
+        .terminal-section {
+            max-width: 720px;
+            margin: 60px auto;
+            padding: 0 24px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .terminal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .terminal-dot.red { background: #ff5f57; }
+        .terminal-dot.yellow { background: #febc2e; }
+        .terminal-dot.green { background: #28c840; }
+
+        .terminal-body {
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .terminal-body .prompt { color: var(--accent); }
+        .terminal-body .cmd { color: var(--text); }
+        .terminal-body .muted { color: var(--text-muted); }
+        .terminal-body .critical { color: var(--red); }
+        .terminal-body .warning { color: var(--yellow); }
+        .terminal-body .pass { color: var(--accent); }
+        .terminal-body .fail { color: var(--red); }
+        .terminal-body .info { color: var(--blue); }
+
+        /* Checks grid */
+        .checks-section {
+            max-width: 900px;
+            margin: 80px auto;
+            padding: 0 24px;
+        }
+
+        .checks-section h2 {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .checks-sub {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 48px;
+            font-size: 16px;
+        }
+
+        .checks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .check-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .check-card:hover { border-color: var(--accent); }
+
+        .check-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .check-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .check-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Platform table */
+        .platforms-section {
+            max-width: 600px;
+            margin: 80px auto;
+            padding: 0 24px;
+        }
+
+        .platforms-section h2 {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .platforms-sub {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .platform-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .platform-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .platform-row:first-child { border-radius: 10px 10px 0 0; }
+        .platform-row:last-child { border-radius: 0 0 10px 10px; }
+
+        .platform-name { font-weight: 500; }
+        .platform-cmd {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Origin */
+        .origin-section {
+            max-width: 640px;
+            margin: 80px auto;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .origin-section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .origin-section p {
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .origin-highlight {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin: 32px 0;
+            flex-wrap: wrap;
+        }
+
+        .origin-stat {
+            text-align: center;
+        }
+
+        .origin-stat .num {
+            font-size: 36px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .origin-stat .num.red { color: var(--red); }
+        .origin-stat .num.yellow { color: var(--yellow); }
+        .origin-stat .num.green { color: var(--accent); }
+
+        .origin-stat .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Comparison */
+        .compare-section {
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 0 24px;
+        }
+
+        .compare-section h2 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 32px;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .compare-table th {
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .compare-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .compare-table .yes { color: var(--accent); }
+        .compare-table .no { color: var(--text-muted); }
+
+        /* CTA */
+        .cta-section {
+            text-align: center;
+            padding: 80px 24px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .cta-section p {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover { background: var(--accent-dim); }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover { border-color: var(--accent); }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 640px) {
+            .stats { gap: 24px; flex-wrap: wrap; }
+            .origin-highlight { gap: 20px; }
+            .platform-cmd { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">v0.1.0 &middot; MIT License &middot; 16+ platforms</div>
+        <h1>Check your research.<br><span>Rigorously.</span></h1>
+        <p class="hero-sub">
+            Catch fabricated citations, overclaimed results, irreproducible numbers,
+            and statistical misinterpretations. Before submission. Before embarrassment.
+        </p>
+        <div class="install-cmd" onclick="navigator.clipboard.writeText('pip install rigorously')">
+            <span class="dollar">$</span>
+            <span class="cmd">pip install</span>
+            <span class="arg">rigorously</span>
+            <span class="copy">copy</span>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+        <div class="stat">
+            <div class="stat-num">8</div>
+            <div class="stat-label">integrity checks</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">16+</div>
+            <div class="stat-label">platforms</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">1</div>
+            <div class="stat-label">command</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">0</div>
+            <div class="stat-label">config needed</div>
+        </div>
+    </section>
+
+    <!-- Terminal demo -->
+    <section class="terminal-section">
+        <div class="section-label">See it in action</div>
+        <div class="terminal">
+            <div class="terminal-bar">
+                <div class="terminal-dot red"></div>
+                <div class="terminal-dot yellow"></div>
+                <div class="terminal-dot green"></div>
+            </div>
+            <div class="terminal-body">
+<span class="prompt">$</span> <span class="cmd">rigorously check paper.tex</span>
+
+<span class="muted">  Overclaim Detection: 4 findings</span>
+  <span class="critical">CRITICAL</span>  <span class="muted">L.56</span>   "validated" <span class="muted">&#8594; use "consistent with"</span>
+  <span class="critical">CRITICAL</span>  <span class="muted">L.216</span>  "proof" <span class="muted">&#8594; models provide evidence, not proof</span>
+  <span class="warning">WARNING</span>   <span class="muted">L.502</span>  "demonstrates" <span class="muted">&#8594; use "indicates"</span>
+  <span class="info">INFO</span>      <span class="muted">L.89</span>   "significant" <span class="muted">&#8594; specify p &lt; X</span>
+
+<span class="muted">  Citation Verification: 12 entries</span>
+  <span class="pass">&#10003;</span> Best2010 <span class="muted">&#8212; DOI resolves, metadata matches</span>
+  <span class="pass">&#10003;</span> Karin2020 <span class="muted">&#8212; DOI resolves, metadata matches</span>
+  <span class="fail">&#10007;</span> LePoul2000 <span class="muted">&#8212; author mismatch: "Bhatt" x4 vs PubMed</span>
+  <span class="pass">&#10003;</span> Mizrachi2023 <span class="muted">&#8212; DOI resolves, metadata matches</span>
+
+<span class="muted">  Number Consistency: 0 contradictions</span>
+  <span class="pass">&#10003;</span> All numbers consistent across sections
+
+<span class="muted">  Verdict:</span> <span class="critical">4 critical issues. Fix before submission.</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8 Checks -->
+    <section class="checks-section">
+        <h2>Eight checks. One command.</h2>
+        <p class="checks-sub">Everything a reviewer would catch, automated.</p>
+        <div class="checks-grid">
+            <div class="check-card">
+                <div class="check-icon">&#128269;</div>
+                <h3>Citation Verification</h3>
+                <p>Verifies every bib entry against CrossRef. DOIs, titles, authors, journals. Catches fabricated references.</p>
+            </div>
+            <div class="check-card">
+                <div class="check-icon">&#9888;&#65039;</div>
+                <h3>Overclaim Detection</h3>
+                <p>Flags "proven," "validated," "novel," "impossible." Suggests precise alternatives reviewers won't challenge.</p>
+            </div>
+            <div class="check-card">
+                <div class="check-icon">&#128290;</div>
+                <h3>Number Consistency</h3>
+                <p>Cross-checks every number across abstract, body, tables, and captions. Flags contradictions.</p>
+            </div>
+            <div class="check-card">
+                <div class="check-icon">&#9881;&#65039;</div>
+                <h3>Parameter Auditing</h3>
+                <p>Verifies code parameters match paper claims. Catches docstring drift and steady-state errors.</p>
+            </div>
+            <div class="check-card">
+                <div class="check-icon">&#128200;</div>
+                <h3>Statistical Auditing</h3>
+                <p>Checks p-values, sample sizes, test appropriateness. Catches non-significance misread as equivalence.</p>
+            </div>
+            <div class="check-card">
+                <div class="check-icon">&#128279;</div>
+                <h3>Evidence Mapping</h3>
+                <p>Traces every claim to supporting code or data. If a claim has no evidence trail, it gets flagged.</p>
+            </div>
+            <div class="check-card">
+                <div class="check-icon">&#9654;&#65039;</div>
+                <h3>Reproducibility</h3>
+                <p>Runs referenced scripts, captures output, compares to paper numbers. Flags discrepancies &gt;1%.</p>
+            </div>
+            <div class="check-card">
+                <div class="check-icon">&#128065;</div>
+                <h3>Adversarial Review</h3>
+                <p>Compiles all findings into a simulated hostile peer review with the most damaging objections.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platforms -->
+    <section class="platforms-section">
+        <h2>One word. Every platform.</h2>
+        <p class="platforms-sub">Tested on CLI and Claude Code. Compatible with 16+ platforms via Agent Skills standard.</p>
+        <div class="platform-list">
+            <div class="platform-row">
+                <span class="platform-name">CLI</span>
+                <span class="platform-cmd">pip install rigorously</span>
+            </div>
+            <div class="platform-row">
+                <span class="platform-name">Claude Code</span>
+                <span class="platform-cmd">claude plugin install rigorously</span>
+            </div>
+            <div class="platform-row">
+                <span class="platform-name">Cursor</span>
+                <span class="platform-cmd">cursor plugin install rigorously</span>
+            </div>
+            <div class="platform-row">
+                <span class="platform-name">OpenAI Codex</span>
+                <span class="platform-cmd">codex plugin install rigorously</span>
+            </div>
+            <div class="platform-row">
+                <span class="platform-name">Kiro (AWS)</span>
+                <span class="platform-cmd">Add power &#8594; rigorously</span>
+            </div>
+            <div class="platform-row">
+                <span class="platform-name">Windsurf</span>
+                <span class="platform-cmd">Add skill &#8594; rigorously</span>
+            </div>
+            <div class="platform-row">
+                <span class="platform-name">Any MCP Client</span>
+                <span class="platform-cmd">"command": "rigorously"</span>
+            </div>
+            <div class="platform-row">
+                <span class="platform-name">Pre-commit</span>
+                <span class="platform-cmd">rigorously install-hook</span>
+            </div>
+            <div class="platform-row">
+                <span class="platform-name">CI/CD</span>
+                <span class="platform-cmd">rigorously check paper.tex</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Origin -->
+    <section class="origin-section">
+        <h2>Built from real mistakes.</h2>
+        <p>
+            During development of a computational neuroscience paper,
+            Rigorously caught every one of these before submission:
+        </p>
+        <div class="origin-highlight">
+            <div class="origin-stat">
+                <div class="num red">5</div>
+                <div class="label">fabricated citations</div>
+            </div>
+            <div class="origin-stat">
+                <div class="num yellow">4</div>
+                <div class="label">overclaimed results</div>
+            </div>
+            <div class="origin-stat">
+                <div class="num green">1</div>
+                <div class="label">bug disguised<br>as a discovery</div>
+            </div>
+        </div>
+        <p>All caught automatically. All fixed before a reviewer saw them.</p>
+    </section>
+
+    <!-- Comparison -->
+    <section class="compare-section">
+        <h2>How it compares</h2>
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Rigorously</th>
+                    <th>RefChecker</th>
+                    <th>ACL pubcheck</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Citation verification</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Overclaim detection</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Number consistency</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Parameter auditing</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Statistical auditing</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Evidence mapping</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Reproducibility</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Adversarial review</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>AI agent integration</td><td class="yes">16+ platforms</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Pre-commit hooks</td><td class="yes">&#10003;</td><td class="no">&#8212;</td><td class="no">&#8212;</td></tr>
+                <tr><td>Format checking</td><td class="no">&#8212;</td><td class="no">&#8212;</td><td class="yes">&#10003;</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ship honest research.</h2>
+        <p>One command between you and a clean submission.</p>
+        <div class="cta-buttons">
+            <a href="https://github.com/XenResearch/rigorously" class="btn btn-primary">
+                GitHub
+            </a>
+            <a href="https://pypi.org/project/rigorously/" class="btn btn-secondary">
+                PyPI
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>
+            <a href="https://github.com/XenResearch/rigorously">GitHub</a>
+            &middot;
+            <a href="https://pypi.org/project/rigorously/">PyPI</a>
+            &middot;
+            MIT License
+            &middot;
+            Made by <a href="https://xen.so">Mansib Miraj</a>
+        </p>
+    </footer>
+
+    <script>
+        document.querySelector('.install-cmd').addEventListener('click', function() {
+            navigator.clipboard.writeText('pip install rigorously');
+            const copy = this.querySelector('.copy');
+            copy.textContent = 'copied!';
+            copy.style.color = '#22c55e';
+            setTimeout(() => { copy.textContent = 'copy'; copy.style.color = ''; }, 2000);
+        });
+    </script>
+</body>
+</html>

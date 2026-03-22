@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use Rigorously in your research, please cite it."
+type: software
+title: "Rigorously: Automated Research Quality Assurance"
+authors:
+  - family-names: Miraj
+    given-names: Mansib
+url: "https://github.com/XenResearch/rigorously"
+repository-code: "https://github.com/XenResearch/rigorously"
+license: MIT
+version: 0.1.0
+date-released: "2026-03-22"
+keywords:
+  - research-integrity
+  - citation-verification
+  - reproducibility
+  - quality-assurance
+  - peer-review

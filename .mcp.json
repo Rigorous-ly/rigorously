@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "rigorous": {
+      "command": "python",
+      "args": ["-m", "rigorous.mcp_server"],
+      "env": {},
+      "description": "Research quality assurance tools: citation verification, overclaim detection, parameter audit, reproducibility checks, statistical rigor, adversarial review, claim-evidence mapping, and full integrity checks."
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "rigorous",
+  "version": "0.1.0",
+  "description": "Automated research quality assurance -- catches the mistakes that slip past manual review",
+  "publisher": "rigorous",
+  "license": "MIT",
+  "skills": {
+    "citation-verify": {
+      "path": "skills/citation-verify/SKILL.md",
+      "triggers": ["*.bib", "check references", "verify citations"]
+    },
+    "overclaim-detect": {
+      "path": "skills/overclaim-detect/SKILL.md",
+      "triggers": ["check for overclaims", "is this too strong", "results section"]
+    },
+    "parameter-audit": {
+      "path": "skills/parameter-audit/SKILL.md",
+      "triggers": ["check parameters", "are these consistent", "parameter mismatch"]
+    },
+    "reproducibility-check": {
+      "path": "skills/reproducibility-check/SKILL.md",
+      "triggers": ["can we reproduce this", "check the numbers", "before submission"]
+    },
+    "statistical-rigor": {
+      "path": "skills/statistical-rigor/SKILL.md",
+      "triggers": ["p-value", "statistical test", "is this statistically sound"]
+    },
+    "adversarial-review": {
+      "path": "skills/adversarial-review/SKILL.md",
+      "triggers": ["review this", "is this ready", "would a reviewer catch this"]
+    },
+    "claim-evidence-map": {
+      "path": "skills/claim-evidence-map/SKILL.md",
+      "triggers": ["what's the evidence", "trace the claims", "map claims"]
+    },
+    "integrity-check": {
+      "path": "skills/integrity-check/SKILL.md",
+      "triggers": ["full audit", "integrity check", "final check"]
+    }
+  },
+  "mcpServers": {
+    "rigorous": {
+      "command": "python",
+      "args": ["-m", "rigorous.mcp_server"]
+    }
+  }
+}
