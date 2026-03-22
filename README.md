@@ -19,6 +19,10 @@ pip install rigorously
 rigorously check paper.tex
 ```
 
+## Run It Before You Submit
+
+Journals like PLOS, Nature, and Science desk-reject up to 40% of submissions for preventable issues: citation errors, missing sections, inconsistent numbers. Each round-trip costs weeks. Rigorously catches these in 3 seconds before a reviewer sees your paper. No account. No cloud. No data leaves your machine.
+
 ## What It Catches
 
 | Check | What It Does |

@@ -14,11 +14,6 @@ authors = [
 ]
 keywords = ["research", "integrity", "quality-assurance", "reproducibility", "citations"]
 
-[project.urls]
-Homepage = "https://rigorous.ly"
-Repository = "https://github.com/rigorous-ly/rigorously"
-Documentation = "https://rigorous.ly"
-"Bug Tracker" = "https://github.com/rigorous-ly/rigorously/issues"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -41,6 +36,12 @@ dependencies = [
 mcp = ["mcp>=1.0.0"]
 dev = ["pytest>=7.0", "pytest-asyncio>=0.21"]
 all = ["rigorously[mcp,dev]"]
+
+[project.urls]
+Homepage = "https://rigorous.ly"
+Repository = "https://github.com/Rigorous-ly/rigorously"
+Documentation = "https://rigorous.ly"
+"Bug Tracker" = "https://github.com/Rigorous-ly/rigorously/issues"
 
 [project.scripts]
 rigorously = "rigorous.cli:app"
