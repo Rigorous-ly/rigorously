@@ -22,6 +22,10 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
+
+# Plan — verification-gated task registry
+from .plan.cli import plan_app
+app.add_typer(plan_app, name="plan")
 console = Console()
 
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rigorously"
-version = "0.1.0"
+version = "0.1.1"
 description = "Automated research quality assurance — catches fabricated citations, overclaimed results, irreproducible numbers, and statistical misinterpretations."
 readme = "README.md"
 license = {text = "MIT"}
@@ -30,6 +30,7 @@ dependencies = [
     "typer>=0.9.0",
     "rich>=13.0.0",
     "httpx>=0.25.0",
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -44,7 +45,7 @@ Documentation = "https://rigorous.ly"
 "Bug Tracker" = "https://github.com/Rigorous-ly/rigorously/issues"
 
 [project.scripts]
-rigorously = "rigorous.cli:app"
+rigorously = "rigorously.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."]
